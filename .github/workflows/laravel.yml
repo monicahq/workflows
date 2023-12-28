@@ -126,7 +126,7 @@ jobs:
           DB_CONNECTION: ${{ inputs.connection }}
 
       - name: Fix results files
-        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
+        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
         working-directory: results/junit
         if: success() || failure()
 
