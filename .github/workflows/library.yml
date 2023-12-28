@@ -76,7 +76,7 @@ jobs:
         if: inputs.coverage
         run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/results.xml --coverage-clover ./results/coverage.xml
       - name: Run tests
-        if: ! inputs.coverage
+        if: ${{ ! inputs.coverage }}
         run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/results.xml
 
       - name: Fix results files

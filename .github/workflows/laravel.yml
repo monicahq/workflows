@@ -139,7 +139,7 @@ jobs:
         env:
           DB_CONNECTION: ${{ inputs.connection }}
       - name: Run tests
-        if: ! inputs.coverage
+        if: ${{ ! inputs.coverage }}
         run: vendor/bin/phpunit -c phpunit.xml --testsuite ${{ inputs.testsuite }} --log-junit ./results/${{ inputs.connection }}/junit/results${{ inputs.testsuite }}.xml
         env:
           DB_CONNECTION: ${{ inputs.connection }}
