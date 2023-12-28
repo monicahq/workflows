@@ -12,6 +12,9 @@ on:
       sources:
         type: string
         default: app,bootstrap,config,database,public,resources,routes
+    secrets:
+      SONAR_TOKEN:
+        required: true
 
 jobs:
   ###########################

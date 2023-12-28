@@ -2,6 +2,9 @@ name: Semantic release
 
 on:
   workflow_call:
+    secrets:
+      GH_TOKEN_RELEASE:
+        required: true
 
 env:
   semantic-node-version: 18
