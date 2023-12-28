@@ -73,7 +73,7 @@ jobs:
 
       - name: Fix results files
         run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
-        working-directory: results
+        working-directory: results/junit
 
       - name: Store results
         if: inputs.coverage
