@@ -115,7 +115,7 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
       - name: Run tests suite with coverage
-        if: inputs.coverage && inputs.testsuite != ''
+        if: inputs.coverage
         run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite == '' || '--testsuite ' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml --coverage-clover ./results/coverage${{ inputs.testsuite }}.xml
         env:
           DB_CONNECTION: ${{ inputs.connection }}
