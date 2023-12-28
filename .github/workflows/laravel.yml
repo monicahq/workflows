@@ -6,10 +6,6 @@ on:
       php-version:
         required: true
         type: string
-      default:
-        required: true
-        type: boolean
-        default: false
       connection:
         required: true
         type: string
