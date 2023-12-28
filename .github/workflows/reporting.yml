@@ -1,17 +1,21 @@
-name: Build and test
+name: Reporting
 
 on:
   workflow_call:
     inputs:
-      sonar_project:
+      project:
         required: true
         type: string
         default: monica
+      organization:
+        required: true
+        type: string
+        default: monicahq
+      sources:
+        required: true
+        type: string
+        default: app,bootstrap,config,database,public,resources,routes
 
-concurrency:
-  group: Build ${{ github.ref }}
-  cancel-in-progress: true
-        
 jobs:
   ###########################
   # Reporting to sonarcloud
@@ -36,6 +40,10 @@ jobs:
 
       - name: Merge junit files
         run: |
+          if [ ! -f "yarn.lock" ]; then
+            npm init -y
+            yarn set version berry
+          fi
           yarn dlx junit-merge --recursive --dir results/junit --out results/results.xml
 
       - name: Set version parameter
@@ -59,9 +67,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: |
-            -Dsonar.projectKey=${{ inputs.sonar_project }}
-            -Dsonar.organization=monicahq
-            -Dsonar.sources=app,bootstrap,config,database,public,resources,routes
+            -Dsonar.projectKey=${{ inputs.project }}
+            -Dsonar.organization=${{ inputs.organization }}
+            -Dsonar.sources=${{ inputs.sources }}
             -Dsonar.exclusions=bootstrap/cache/*,public/vendor/**,resources/lang/**
             -Dsonar.tests=tests
             -Dsonar.coverage.exclusions=routes/*.php,config/**/*.php,bootstrap/**,resources/**/*.php,database/**/*.php,public/*.php,resources/**/*.vue,resources/**/*.js

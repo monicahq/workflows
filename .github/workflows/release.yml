@@ -1,0 +1,51 @@
+name: Semantic release
+
+on:
+  workflow_call:
+
+env:
+  semantic-node-version: 18
+
+jobs:
+  ####################
+  # Semantic release
+  ####################
+  semantic-release:
+    runs-on: ubuntu-latest
+    name: Semantic release
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.semantic-node-version }}
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN_RELEASE: ${{ secrets.GH_TOKEN_RELEASE }}
+        with:
+          semantic_version: ${{ env.semantic-node-version }}
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@5.0.0
+            @semantic-release/changelog@6
+            semantic-release-github-pullrequest
+
+      - name: New release published
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: echo ${{ steps.semantic.outputs.new_release_version }}
+
+      - name: Store changelog file
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGELOG.md
