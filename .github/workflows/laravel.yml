@@ -116,18 +116,18 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
       - name: Run tests suite with coverage
         if: inputs.coverage
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite == '' || '--testsuite ' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml --coverage-clover ./results/coverage${{ inputs.testsuite }}.xml
+        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite == '' && '' || '--testsuite ' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml --coverage-clover ./results/coverage${{ inputs.testsuite }}.xml
         env:
           DB_CONNECTION: ${{ inputs.connection }}
       - name: Run tests
         if: ${{ ! inputs.coverage }}
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite == '' || '--testsuite ' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml
+        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite == '' && '' || '--testsuite ' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml
         env:
           DB_CONNECTION: ${{ inputs.connection }}
 
       - name: Fix results files
         run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
-        working-directory: results
+        working-directory: results/junit
         if: success() || failure()
 
       - name: Store results
