@@ -20,11 +20,9 @@ on:
         required: true
         type: string
       database_name:
-        required: true
         type: string
         default: monica
       database_secret:
-        required: true
         type: string
         default: secret
 

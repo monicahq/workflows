@@ -6,13 +6,10 @@ on:
       project:
         required: true
         type: string
-        default: monica
       organization:
-        required: true
         type: string
         default: monicahq
       sources:
-        required: true
         type: string
         default: app,bootstrap,config,database,public,resources,routes
 
