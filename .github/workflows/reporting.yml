@@ -1,0 +1,72 @@
+name: Build and test
+
+on:
+  workflow_call:
+    inputs:
+      sonar_project:
+        required: true
+        type: string
+        default: monica
+
+concurrency:
+  group: Build ${{ github.ref }}
+  cancel-in-progress: true
+        
+jobs:
+  ###########################
+  # Reporting to sonarcloud
+  ###########################
+  sonarcloud:
+    runs-on: ubuntu-latest
+    name: Sonarcloud
+    if: success() || failure()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Download results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: results-*
+          path: results
+          merge-multiple: true
+
+      - name: Merge junit files
+        run: |
+          yarn dlx junit-merge --recursive --dir results/junit --out results/results.xml
+
+      - name: Set version parameter
+        id: version
+        run: |
+          version=$(git tag --points-at HEAD)
+          test -z "$version" && version="main"
+          echo "value=$version" >> $GITHUB_OUTPUT
+
+      - name: Set coverage list
+        id: coverage
+        run: |
+          SONAR_COVERAGE=$(ls -m --format=comma results/coverage*.xml | sed -e ':a;N;$!ba;s/\n//g; s/ //g;')
+          echo "list=$SONAR_COVERAGE" >> $GITHUB_OUTPUT
+
+      - name: SonarCloud Scan
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: |
+            -Dsonar.projectKey=${{ inputs.sonar_project }}
+            -Dsonar.organization=monicahq
+            -Dsonar.sources=app,bootstrap,config,database,public,resources,routes
+            -Dsonar.exclusions=bootstrap/cache/*,public/vendor/**,resources/lang/**
+            -Dsonar.tests=tests
+            -Dsonar.coverage.exclusions=routes/*.php,config/**/*.php,bootstrap/**,resources/**/*.php,database/**/*.php,public/*.php,resources/**/*.vue,resources/**/*.js
+            -Dsonar.cpd.exclusions=routes/*.php,config/*.php,bootstrap/**,resources/**/*.php,database/**/*.php
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectVersion=${{ steps.version.outputs.value }}
+            -Dsonar.php.tests.reportPath=./results/results.xml
+            -Dsonar.php.coverage.reportPaths=${{ steps.coverage.outputs.list }}
