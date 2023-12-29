@@ -1,0 +1,77 @@
+name: Semantic release
+
+on:
+  workflow_call:
+    inputs:
+      extra_plugins:
+        type: string
+      conventionalcommits_version:
+        type: string
+        default: '5.0.0'
+      semantic_changelog_version:
+        type: string
+        default: '6'
+      semantic_version:
+        type: string
+        default: '19'
+      semantic_node_version:
+        type: string
+        default: '18'
+    secrets:
+      GH_TOKEN_RELEASE:
+        required: true
+    outputs:
+      new_release_published:
+        description: Whether a new release has been published
+        value: ${{ jobs.semantic-release.outputs.new_release_published }}
+      new_release_version:
+        description: The new release version
+        value: ${{ jobs.semantic-release.outputs.new_release_version }}
+
+jobs:
+  ####################
+  # Semantic release
+  ####################
+  semantic-release:
+    runs-on: ubuntu-latest
+    name: Semantic release
+    if: github.event_name != 'pull_request'
+
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.semantic_node_version }}
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN_RELEASE: ${{ secrets.GH_TOKEN_RELEASE }}
+        with:
+          semantic_version: ${{ inputs.semantic_version }}
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@${{ inputs.conventionalcommits_version }}
+            @semantic-release/changelog@${{ inputs.semantic_changelog_version }}
+            ${{ inputs.extra_plugins }}
+
+      - name: New release published
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: echo "### Release ${{ steps.semantic.outputs.new_release_version }} created :rocket:" >> $GITHUB_STEP_SUMMARY
+
+      - name: Store changelog file
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGELOG.md

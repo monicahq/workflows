@@ -1,0 +1,78 @@
+name: Unit tests
+
+on:
+  workflow_call:
+    inputs:
+      php-version:
+        required: true
+        type: string
+      laravel-version:
+        required: true
+        type: string
+      coverage:
+        required: true
+        type: boolean
+
+env:
+  semantic-node-version: 18
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Tests with PHP ${{ inputs.php-version }} + Illuminate ${{ inputs.laravel-version }}
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ inputs.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php-version }}
+          coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
+          ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
+
+      - name: Check PHP Version
+        run: php -v
+      - name: Check Composer Version
+        run: composer -V
+      - name: Check PHP Extensions
+        run: php -m
+      - name: Setup problem matchers for PHP
+        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+
+    # Composer
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Cache composer files
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
+            ${{ runner.os }}-composer-${{ inputs.php-version }}
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies with Laravel ${{ inputs.laravel-version }}
+        run: |
+          export COMPOSER_ROOT_VERSION=dev-main
+          composer require "illuminate/support:${{ inputs.laravel-version }}" --no-update
+          composer update --no-interaction --no-progress --prefer-dist
+
+      - name: Run tests
+        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results.xml ${{ inputs.coverage && '--coverage-clover ./results/coverage.xml' || '' }}
+
+      - name: Fix results files
+        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
+        working-directory: results/junit
+
+      - name: Store results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ inputs.php-version }}-${{ inputs.laravel-version }}
+          path: results

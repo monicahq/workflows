@@ -1,0 +1,101 @@
+name: Reporting
+
+on:
+  workflow_call:
+    inputs:
+      project:
+        required: true
+        type: string
+      organization:
+        type: string
+        default: monicahq
+      sources:
+        type: string
+        default: app,bootstrap,config,database,public,resources,routes
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+jobs:
+  ###########################
+  # Reporting to sonarcloud
+  ###########################
+  sonarcloud:
+    runs-on: ubuntu-latest
+    name: Sonarcloud
+    if: success() || failure()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Download results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: results*
+          path: results
+          merge-multiple: true
+
+      - name: Merge junit files
+        run: |
+          mkdir -p $RUNNER_TEMP/junit-merge
+          cd $RUNNER_TEMP/junit-merge
+          npm init -y
+          yarn set version berry
+          yarn dlx junit-merge --recursive --dir $GITHUB_WORKSPACE/results/junit --out $GITHUB_WORKSPACE/results/results.xml
+
+      - name: Set version parameter
+        id: version
+        run: |
+          version=$(git tag --points-at HEAD)
+          test -z "$version" && version="main"
+          echo "value=$version" >> $GITHUB_OUTPUT
+
+      - name: Set coverage list
+        id: coverage
+        run: |
+          SONAR_COVERAGE=$(ls -m --format=comma results/coverage*.xml | sed -e ':a;N;$!ba;s/\n//g; s/ //g;')
+          echo "list=$SONAR_COVERAGE" >> $GITHUB_OUTPUT
+
+      - name: SonarCloud Scan
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: |
+            -Dsonar.projectKey=${{ inputs.project }}
+            -Dsonar.organization=${{ inputs.organization }}
+            -Dsonar.sources=${{ inputs.sources }}
+            -Dsonar.exclusions=bootstrap/cache/*,public/vendor/**,resources/lang/**
+            -Dsonar.tests=tests
+            -Dsonar.coverage.exclusions=routes/*.php,config/**/*.php,bootstrap/**,resources/**/*.php,database/**/*.php,public/*.php,resources/**/*.vue,resources/**/*.js
+            -Dsonar.cpd.exclusions=routes/*.php,config/*.php,bootstrap/**,resources/**/*.php,database/**/*.php
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectVersion=${{ steps.version.outputs.value }}
+            -Dsonar.php.tests.reportPath=./results/results.xml
+            -Dsonar.php.coverage.reportPaths=${{ steps.coverage.outputs.list }}
+
+  ###########################
+  # JUnit Test Report
+  ###########################
+  reporting:
+    runs-on: ubuntu-latest
+    name: Reporting
+    if: success() || failure()
+
+    steps:
+      - name: Download results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: results*
+          path: results
+          merge-multiple: true
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: results/junit/*.xml
