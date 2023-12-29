@@ -154,9 +154,14 @@ jobs:
         working-directory: results/junit
         if: success() || failure()
 
+      - name: Fix results artifact name
+        if: success() || failure()
+        id: artifact
+        run: echo "name=results${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
+
       - name: Store results
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: results${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}
+          name: ${{ steps.artifact.outputs.name }}
           path: results
