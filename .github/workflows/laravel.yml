@@ -23,6 +23,9 @@ on:
       database_secret:
         type: string
         default: secret
+      vite:
+        type: boolean
+        default: true
 
 jobs:
   #############
@@ -77,6 +80,9 @@ jobs:
       - name: Prepare environment
         run: |
           cp tests/.env.ci.${{ inputs.connection }} .env
+      - name: Mock assets
+        if: inputs.vite
+        run: |
           mkdir -p public/build/assets
           {\
             echo "{"; \
@@ -88,6 +94,20 @@ jobs:
             done; \
             echo "}"; \
           } | tee public/build/manifest.json
+      - name: Mock assets (mix)
+        if: ${{ ! inputs.vite }}
+        run: |
+          mkdir -p public/js public/css
+          {\
+            echo "{"; \
+            for f in app.js app.css app2.js app2.css; do \
+              [[ $first == 1 ]] && echo -n "," || first=1; \
+              k=${f##*.}/$f; \
+              echo "\"/$k\": \"/$k\""; \
+              echo '' > public/$k; \
+            done; \
+            echo "}"; \
+          } | tee public/mix-manifest.json
       - name: Create sqlite database
         if: inputs.connection == 'sqlite'
         run: touch database/database.sqlite
