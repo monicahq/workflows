@@ -6,6 +6,20 @@ on:
       node-version:
         required: true
         type: string
+      store:
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      commit:
+        description: The commit hash of the build
+        value: ${{ jobs.build.outputs.commit }}
+      version:
+        description: The version of the build
+        value: ${{ jobs.build.outputs.version }}
+      release:
+        description: The release of the build
+        value: ${{ jobs.build.outputs.release }}
 
 jobs:
   #############
@@ -14,6 +28,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build Assets
+    outputs:
+      commit: ${{ steps.version.outputs.commit }}
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
 
     strategy:
       fail-fast: false
@@ -30,5 +48,40 @@ jobs:
           cache: yarn
       - name: Install yarn dependencies
         run: yarn install --immutable
+
+      - name: Get version
+        id: version
+        run: |
+          commit=$(git log --pretty="%H" -n1)
+          version=$(git describe --abbrev=0 --tags 2>/dev/null || echo '0.0.0' | sed 's/^v//')
+          release=$(git log --pretty="%h" -n1 $commit)
+          echo "commit=$commit" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "release=$release" >> $GITHUB_OUTPUT
+
+      - name: Prepare environment
+        run: |
+          { \
+            echo "VITE_PROD_SOURCE_MAPS=true"; \
+            echo "VITE_SENTRY_RELEASE=${{ steps.version.outputs.release }}"; \
+          } | tee .env
+
       - name: Build assets
         run: yarn run build
+
+      - name: Store assets
+        if: inputs.store
+        uses: actions/upload-artifact@v4
+        with:
+          name: assets
+          path: |
+            public/build/**/*
+            !public/build/**/*.map
+
+      - name: Store source maps
+        if: inputs.store
+        uses: actions/upload-artifact@v4
+        with:
+          name: sourcemaps
+          path: |
+            public/build/**/*.map
