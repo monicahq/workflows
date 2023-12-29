@@ -97,7 +97,7 @@ jobs:
         if: inputs.connection == 'pgsql'
         run: |
           sudo systemctl start postgresql.service
-          sudo -u postgres psql --command="CREATE USER ${{ inputs.database_name }} PASSWORD 'secret'" --command="\du"
+          sudo -u postgres psql --command="CREATE USER ${{ inputs.database_name }} PASSWORD '${{ inputs.database_secret }}'" --command="\du"
           sudo -u postgres createdb --owner=${{ inputs.database_name }} ${{ inputs.database_name }}
           PGPASSWORD=${{ inputs.database_secret }} psql --username=${{ inputs.database_name }} --host=localhost --list ${{ inputs.database_name }}
 
