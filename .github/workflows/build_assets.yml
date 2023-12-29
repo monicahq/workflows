@@ -7,10 +7,6 @@ on:
         required: true
         type: string
 
-concurrency:
-  group: Build assets ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   #############
   # Build
