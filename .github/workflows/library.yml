@@ -64,20 +64,15 @@ jobs:
           composer require "illuminate/support:${{ inputs.laravel-version }}" --no-update
           composer update --no-interaction --no-progress --prefer-dist
 
-      - name: Run tests suite with coverage
-        if: inputs.coverage
-        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results.xml --coverage-clover ./results/coverage.xml
       - name: Run tests
-        if: ${{ ! inputs.coverage }}
-        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results.xml
+        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results.xml ${{ inputs.coverage && '--coverage-clover ./results/coverage.xml' || '' }}
 
       - name: Fix results files
         run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
         working-directory: results/junit
 
       - name: Store results
-        if: inputs.coverage
         uses: actions/upload-artifact@v4
         with:
-          name: results
+          name: results-${{ inputs.php-version }}-${{ inputs.laravel-version }}
           path: results

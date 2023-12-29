@@ -155,8 +155,8 @@ jobs:
         if: success() || failure()
 
       - name: Store results
-        if: inputs.coverage && (success() || failure())
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ inputs.php-version }}-${{ inputs.connection }}-${{ inputs.testsuite }}
+          name: results${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}
           path: results
