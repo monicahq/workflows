@@ -14,6 +14,9 @@ on:
         type: boolean
       testsuite:
         type: string
+      database_seed:
+        type: boolean
+        default: false
       database_name:
         type: string
         default: monica
@@ -108,6 +111,7 @@ jobs:
         run: php artisan migrate --no-interaction -vvv
       - name: Run seeds
         run: php artisan db:seed --no-interaction -vvv
+        if: inputs.database_seed
       - name: Cache route
         run: php artisan route:cache
 
