@@ -3,158 +3,52 @@ name: Build and test
 on:
   workflow_call:
     inputs:
-      php-version:
+      php-versions:
         required: true
         type: string
-      connection:
+      connections:
         required: true
         type: string
-      coverage:
+      default-php-version:
         required: true
-        type: boolean
-      testsuite:
         type: string
-      database_seed:
-        type: boolean
-        default: false
-      database_name:
+      default-connection:
+        required: true
         type: string
-        default: monica
-      database_secret:
+      project:
+        required: true
         type: string
-        default: secret
-      vite:
-        type: boolean
-        default: true
+      organization:
+        type: string
+        default: monicahq
+      matrix-exclude:
+        type: string
+        default: '[]'
+    secrets:
+      SONAR_TOKEN:
+        required: true
 
 jobs:
-  #############
-  # Run tests
-  #############
   tests:
-    runs-on: ubuntu-latest
-    name: Testsuite ${{ inputs.testsuite }} with PHP ${{ inputs.php-version }} + ${{ inputs.connection }}
+    uses: ./.github/workflows/test_website.yml
+    with:
+      php-version: ${{ matrix.php-version }}
+      connection: ${{ matrix.connection }}
+      coverage: ${{ matrix.connection == inputs.default-connection && matrix.php-version == inputs.default-php-version }}
 
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJson(inputs.php-versions) }}
+        connection: ${{ fromJson(inputs.connections) }}
+        exclude: ${{ fromJson(inputs.matrix-exclude) }}
 
-      - name: Setup PHP ${{ inputs.php-version }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ inputs.php-version }}
-          extensions: mbstring, dom, fileinfo, ${{ inputs.connection }}
-          coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
-          ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
-
-      - name: Check PHP Version
-        run: php -v
-      - name: Check Composer Version
-        run: composer -V
-      - name: Check PHP Extensions
-        run: php -m
-      - name: Setup problem matchers for PHP
-        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-
-    # Composer
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - name: Cache composer files
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-            ${{ runner.os }}-composer-${{ inputs.php-version }}
-            ${{ runner.os }}-composer-
-
-      - name: Install composer dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
-
-    # Prepare
-      - name: Prepare environment
-        run: |
-          cp tests/.env.ci.${{ inputs.connection }} .env
-      - name: Mock assets
-        if: inputs.vite
-        run: |
-          mkdir -p public/build/assets
-          {\
-            echo "{"; \
-            for f in app.js app.css; do \
-              [[ $first == 1 ]] && echo -n "," || first=1; \
-              k=${f##*.}/$f; \
-              echo "\"resources/$k\": {\"file\": \"assets/$f\", \"src\": \"resources/$k\"}"; \
-              echo '' > public/build/assets/$f; \
-            done; \
-            echo "}"; \
-          } | tee public/build/manifest.json
-      - name: Mock assets (mix)
-        if: ${{ ! inputs.vite }}
-        run: |
-          mkdir -p public/js public/css
-          {\
-            echo "{"; \
-            for f in app.js app.css app2.js app2.css; do \
-              [[ $first == 1 ]] && echo -n "," || first=1; \
-              k=${f##*.}/$f; \
-              echo "\"/$k\": \"/$k\""; \
-              echo '' > public/$k; \
-            done; \
-            echo "}"; \
-          } | tee public/mix-manifest.json
-      - name: Create sqlite database
-        if: inputs.connection == 'sqlite'
-        run: touch database/database.sqlite
-      - name: Create mysql database
-        if: inputs.connection == 'mysql'
-        run: |
-          sudo systemctl start mysql.service
-          mysql --protocol=tcp -u root -proot -e "CREATE DATABASE IF NOT EXISTS ${{ inputs.database_name }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-      - name: Create pgsql database
-        if: inputs.connection == 'pgsql'
-        run: |
-          sudo systemctl start postgresql.service
-          sudo -u postgres psql --command="CREATE USER ${{ inputs.database_name }} PASSWORD '${{ inputs.database_secret }}'" --command="\du"
-          sudo -u postgres createdb --owner=${{ inputs.database_name }} ${{ inputs.database_name }}
-          PGPASSWORD=${{ inputs.database_secret }} psql --username=${{ inputs.database_name }} --host=localhost --list ${{ inputs.database_name }}
-
-      - name: Generate key
-        run: php artisan key:generate
-
-      - name: Run migrations
-        run: php artisan migrate --no-interaction -vvv
-      - name: Run seeds
-        run: php artisan db:seed --no-interaction -vvv
-        if: inputs.database_seed
-      - name: Cache route
-        run: php artisan route:cache
-
-      - name: Set results artifact name
-        id: artifact
-        run: echo "name=${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
-
-    # Test
-      - name: Setup problem matchers for PHPUnit
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-      - name: Run tests suite
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite != '' && format('--testsuite {0}', inputs.testsuite) || '' }} --log-junit ./results/junit/results${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage{0}.xml', steps.artifact.outputs.name) || '' }}
-        env:
-          DB_CONNECTION: ${{ inputs.connection }}
-
-      - name: Fix results files
-        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
-        working-directory: results/junit
-        if: success() || failure()
-
-      - name: Store results
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: results${{ steps.artifact.outputs.name }}
-          path: results
+  reporting:
+    uses: ./.github/workflows/reporting.yml
+    with:
+      project: ${{ inputs.project }}
+      organization: ${{ inputs.organization }}
+      pattern: ${{ format('results_{0}_{1}*', inputs.default-connection, inputs.default-php-version) }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    needs: tests
