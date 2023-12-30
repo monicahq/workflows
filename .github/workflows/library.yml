@@ -21,9 +21,6 @@ on:
       organization:
         type: string
         default: monicahq
-      node-version:
-        required: true
-        type: string
       matrix-exclude:
         type: string
         default: '[]'
