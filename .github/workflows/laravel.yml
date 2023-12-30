@@ -30,6 +30,7 @@ on:
 
 jobs:
   tests:
+    name: Unit tests
     uses: ./.github/workflows/test_website.yml
     with:
       php-version: ${{ matrix.php-version }}
@@ -44,6 +45,7 @@ jobs:
         exclude: ${{ fromJson(inputs.matrix-exclude) }}
 
   reporting:
+    name: Reportings
     uses: ./.github/workflows/reporting.yml
     with:
       project: ${{ inputs.project }}
