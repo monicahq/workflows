@@ -72,7 +72,7 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
       - name: Run tests
-        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results-${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && ('--coverage-clover ./results/coverage' && steps.artifact.outputs.name && '.xml') || '' }}
+        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results-${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage{0}.xml', steps.artifact.outputs.name) || '' }}
 
       - name: Fix results files
         if: success() || failure()
