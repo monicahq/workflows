@@ -24,6 +24,18 @@ on:
       matrix-exclude:
         type: string
         default: '[]'
+      database_seed:
+        type: boolean
+        default: false
+      database_name:
+        type: string
+        default: monica
+      database_secret:
+        type: string
+        default: secret
+      vite:
+        type: boolean
+        default: true
     secrets:
       SONAR_TOKEN:
         required: true
@@ -36,6 +48,10 @@ jobs:
       php-version: ${{ matrix.php-version }}
       connection: ${{ matrix.connection }}
       coverage: ${{ matrix.connection == inputs.default-connection && matrix.php-version == inputs.default-php-version }}
+      database_seed: ${{ inputs.database_seed }}
+      database_name: ${{ inputs.database_name }}
+      database_secret: ${{ inputs.database_secret }}
+      vite: ${{ inputs.vite }}
 
     strategy:
       fail-fast: false
