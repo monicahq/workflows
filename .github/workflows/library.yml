@@ -83,5 +83,5 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ steps.artifact.outputs.name }}
+          name: results_${{ steps.artifact.outputs.name }}
           path: results
