@@ -27,7 +27,7 @@ jobs:
   #############
   build:
     runs-on: ubuntu-latest
-    name: Build Assets
+    name: Build assets
     outputs:
       commit: ${{ steps.version.outputs.commit }}
       version: ${{ steps.version.outputs.version }}
