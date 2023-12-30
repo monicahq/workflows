@@ -30,8 +30,6 @@ on:
     secrets:
       SONAR_TOKEN:
         required: true
-      GH_TOKEN_RELEASE:
-        required: true
 
 jobs:
   tests:
@@ -57,10 +55,4 @@ jobs:
       sources: src
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    needs: tests
-
-  release:
-    uses: ./.github/workflows/release.yml
-    secrets:
-      GH_TOKEN_RELEASE: ${{ secrets.GH_TOKEN_RELEASE }}
     needs: tests

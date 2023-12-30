@@ -21,9 +21,6 @@ on:
       organization:
         type: string
         default: monicahq
-      node-version:
-        required: true
-        type: string
       matrix-exclude:
         type: string
         default: '[]'
@@ -55,8 +52,3 @@ jobs:
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     needs: tests
-
-  assets:
-    uses: ./.github/workflows/build_assets.yml
-    with:
-      node-version: ${{ inputs.node-version }}
