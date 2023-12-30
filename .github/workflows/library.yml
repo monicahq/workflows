@@ -66,18 +66,18 @@ jobs:
 
       - name: Set results artifact name
         id: artifact
-        run: echo "name=${{ inputs.php-version }}-${{ inputs.laravel-version }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
+        run: echo "name=${{ inputs.php-version }}_${{ inputs.laravel-version }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
       - name: Run tests
-        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results-${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage{0}.xml', steps.artifact.outputs.name) || '' }}
+        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results_${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage_{0}.xml', steps.artifact.outputs.name) || '' }}
 
       - name: Fix results files
         if: success() || failure()
-        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
-        working-directory: results/junit
+        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
+        working-directory: results
 
       - name: Store results
         if: success() || failure()
