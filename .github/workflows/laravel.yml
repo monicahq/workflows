@@ -135,17 +135,15 @@ jobs:
       - name: Cache route
         run: php artisan route:cache
 
+      - name: Set results artifact name
+        id: artifact
+        run: echo "name=${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
+
     # Test
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-      - name: Run tests suite with coverage
-        if: inputs.coverage
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite != '' && '--testsuite ' || '' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml --coverage-clover ./results/coverage${{ inputs.testsuite }}.xml
-        env:
-          DB_CONNECTION: ${{ inputs.connection }}
-      - name: Run tests
-        if: ${{ ! inputs.coverage }}
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite != '' && '--testsuite ' || '' }}${{ inputs.testsuite }} --log-junit ./results/junit/results${{ inputs.testsuite }}.xml
+      - name: Run tests suite
+        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite != '' && ('--testsuite ' && inputs.testsuite) || '' }} --log-junit ./results/junit/results${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && ('--coverage-clover ./results/coverage' && steps.artifact.outputs.name && '.xml') || '' }}
         env:
           DB_CONNECTION: ${{ inputs.connection }}
 
@@ -154,14 +152,9 @@ jobs:
         working-directory: results/junit
         if: success() || failure()
 
-      - name: Fix results artifact name
-        if: success() || failure()
-        id: artifact
-        run: echo "name=results${{ inputs.testsuite }}-${{ inputs.php-version }}-${{ inputs.connection }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
-
       - name: Store results
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.artifact.outputs.name }}
+          name: results${{ steps.artifact.outputs.name }}
           path: results
