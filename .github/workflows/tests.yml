@@ -30,7 +30,7 @@ on:
 
 jobs:
   tests:
-    uses: ./.github/workflows/laravel.yml
+    uses: monicahq/workflows/.github/workflows/laravel.yml@fix-results3
     with:
       php-version: ${{ matrix.php-version }}
       connection: ${{ matrix.connection }}
@@ -43,7 +43,7 @@ jobs:
         connection: ${{ fromJson(inputs.connections) }}
 
   reporting:
-    uses: ./.github/workflows/reporting.yml
+    uses: monicahq/workflows/.github/workflows/reporting.yml@fix-results3
     with:
       project: ${{ inputs.project }}
       organization: ${{ inputs.organization }}
@@ -53,6 +53,6 @@ jobs:
     needs: tests
 
   assets:
-    uses: ./.github/workflows/build_assets.yml
+    uses: monicahq/workflows/.github/workflows/build_assets.yml@fix-results3
     with:
       node-version: ${{ inputs.node-version }}
