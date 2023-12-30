@@ -1,0 +1,58 @@
+name: Build and test
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        required: true
+        type: string
+      connections:
+        required: true
+        type: string
+      default-php-version:
+        required: true
+        type: string
+      default-connection:
+        required: true
+        type: string
+      project:
+        required: true
+        type: string
+      organization:
+        type: string
+        default: monicahq
+      node-version:
+        required: true
+        type: string
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+jobs:
+  tests:
+    uses: ./.github/workflows/laravel.yml
+    with:
+      php-version: ${{ matrix.php-version }}
+      connection: ${{ matrix.connection }}
+      coverage: ${{ matrix.connection == inputs.default-connection && matrix.php-version == inputs.default-php-version }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJson(inputs.php-versions) }}
+        connection: ${{ fromJson(inputs.connections) }}
+
+  reporting:
+    uses: ./.github/workflows/reporting.yml
+    with:
+      project: ${{ inputs.project }}
+      organization: ${{ inputs.organization }}
+      pattern: ${{ format('results_{0}_{1}*', inputs.default-connection, inputs.default-php-version) }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    needs: tests
+
+  assets:
+    uses: ./.github/workflows/build_assets.yml
+    with:
+      node-version: ${{ inputs.node-version }}
