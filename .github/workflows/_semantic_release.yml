@@ -21,15 +21,9 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Set tag
-        id: tag
-        run: |
-          tag=$(echo "${{ needs.semantic-release.outputs.new_release_tag }}" | cut -d'.' -f1)
-          echo "name=$tag" >> $GITHUB_OUTPUT
-
       - name: Update Tag
         uses: richardsimko/update-tag@v1
         with:
-          tag_name: ${{ steps.tag.outputs.name }}
+          tag_name: v${{ needs.semantic-release.outputs.new_release_major_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
