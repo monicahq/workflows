@@ -1,0 +1,33 @@
+name: Semantic release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  semantic-release:
+    name: Semantic release
+    uses: ./.github/workflows/release.yml
+
+  tag:
+    name: Update major tag
+    needs: semantic-release
+    runs-on: ubuntu-latest
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set tag
+        id: tag
+        run: |
+          tag=$(echo "${{ needs.semantic-release.outputs.new_release_tag }}" | cut -d'.' -f1)
+          echo "name=$tag" >> $GITHUB_OUTPUT
+
+      - name: Update Tag
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
