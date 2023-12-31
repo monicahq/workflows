@@ -7,16 +7,16 @@ on:
         type: string
       conventionalcommits_version:
         type: string
-        default: '5.0.0'
+        default: '7'
       semantic_changelog_version:
         type: string
         default: '6'
       semantic_version:
         type: string
-        default: '19'
+        default: '22'
       semantic_node_version:
         type: string
-        default: '18'
+        default: '20'
     secrets:
       GH_TOKEN_RELEASE:
         required: true
