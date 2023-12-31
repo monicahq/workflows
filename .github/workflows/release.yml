@@ -26,6 +26,15 @@ on:
       new_release_version:
         description: The new release version
         value: ${{ jobs.semantic-release.outputs.new_release_version }}
+      new_release_major_version:
+        description: The new release major version
+        value: ${{ jobs.semantic-release.outputs.new_release_major_version }}
+      new_release_minor_version:
+        description: The new release minor version
+        value: ${{ jobs.semantic-release.outputs.new_release_minor_version }}
+      new_release_patch_version:
+        description: The new release patch version
+        value: ${{ jobs.semantic-release.outputs.new_release_patch_version }}
 
 jobs:
   ####################
@@ -39,6 +48,9 @@ jobs:
     outputs:
       new_release_published: ${{ steps.semantic.outputs.new_release_published }}
       new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+      new_release_major_version: ${{ steps.semantic.outputs.new_release_major_version }}
+      new_release_minor_version: ${{ steps.semantic.outputs.new_release_minor_version }}
+      new_release_patch_version: ${{ steps.semantic.outputs.new_release_patch_version }}
 
     steps:
       - name: Checkout repository
