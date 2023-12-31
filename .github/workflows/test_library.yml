@@ -13,9 +13,6 @@ on:
         required: true
         type: boolean
 
-env:
-  semantic-node-version: 18
-
 jobs:
   tests:
     runs-on: ubuntu-latest
