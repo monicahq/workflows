@@ -1,14 +1,6 @@
 name: Semantic release
 
 on:
-  push:
-    branches:
-      - main
-      - next
-      - next-major
-      - beta
-      - alpha
-
   workflow_call:
     inputs:
       extra_plugins:
@@ -27,7 +19,6 @@ on:
         default: '20'
     secrets:
       GH_TOKEN_RELEASE:
-        required: true
     outputs:
       new_release_published:
         description: Whether a new release has been published
