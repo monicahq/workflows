@@ -24,6 +24,9 @@ on:
       matrix-exclude:
         type: string
         default: '[]'
+      testsuites:
+        type: string
+        default: '[]'
       database_seed:
         type: boolean
         default: false
@@ -48,6 +51,7 @@ jobs:
       php-version: ${{ matrix.php-version }}
       connection: ${{ matrix.connection }}
       coverage: ${{ matrix.connection == inputs.default-connection && matrix.php-version == inputs.default-php-version }}
+      testsuite: ${{ matrix.testsuites }}
       database_seed: ${{ inputs.database_seed }}
       database_name: ${{ inputs.database_name }}
       database_secret: ${{ inputs.database_secret }}
@@ -59,6 +63,7 @@ jobs:
         php-version: ${{ fromJson(inputs.php-versions) }}
         connection: ${{ fromJson(inputs.connections) }}
         exclude: ${{ fromJson(inputs.matrix-exclude) }}
+        testsuites: ${{ fromJson(inputs.testsuites) }}
 
   reporting:
     name: Reportings
