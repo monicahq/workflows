@@ -28,11 +28,6 @@ jobs:
     name: Sonarcloud
     if: success() || failure()
 
-    permissions:
-      contents: read
-      checks: write
-      id-token: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -94,6 +89,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Reporting
     if: success() || failure()
+
+    permissions:
+      contents: read
+      checks: write
+      id-token: write
 
     steps:
       - name: Download results
