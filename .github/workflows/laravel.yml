@@ -26,7 +26,7 @@ on:
         default: '[]'
       testsuites:
         type: string
-        default: '[]'
+        default: ''
       database_seed:
         type: boolean
         default: false
@@ -54,12 +54,8 @@ jobs:
         run: |
           {
             echo -n "matrix={"
-            if [ -n "${{ inputs.php-versions }}" ]; then
-              echo -n "\"php-version\": ${{ inputs.php-versions }},"
-            fi
-            if [ -n "${{ inputs.connections }}" ]; then
-              echo -n "\"connection\": ${{ inputs.connections }},"
-            fi
+            echo -n "\"php-version\": ${{ inputs.php-versions }},"
+            echo -n "\"connection\": ${{ inputs.connections }},"
             if [ -n "${{ inputs.testsuites }}" ]; then
               echo -n "\"testsuites\": ${{ inputs.testsuites }},"
             fi
