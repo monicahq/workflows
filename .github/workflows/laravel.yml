@@ -44,9 +44,32 @@ on:
         required: true
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Setup matrix
+        id: matrix
+        run: |
+          {
+            echo "matrix={"
+            if [ -n "${{ inputs.php-versions }}" ]; then
+              echo "\"php-version\": ${{ inputs.php-versions }},"
+            fi
+            if [ -n "${{ inputs.connections }}" ]; then
+              echo "\"connection\": ${{ inputs.connections }},"
+            fi
+            if [ -n "${{ inputs.testsuites }}" ]; then
+              echo "\"testsuites\": ${{ inputs.testsuites }},"
+            fi
+            echo "\"exclude\": ${{ inputs.matrix-exclude }}}"
+          } | tee $GITHUB_OUTPUT
+
   tests:
     name: Unit tests
     uses: ./.github/workflows/test_website.yml
+    needs: init
     with:
       php-version: ${{ matrix.php-version }}
       connection: ${{ matrix.connection }}
@@ -59,11 +82,7 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        php-version: ${{ fromJson(inputs.php-versions) }}
-        connection: ${{ fromJson(inputs.connections) }}
-        exclude: ${{ fromJson(inputs.matrix-exclude) }}
-        testsuites: ${{ fromJson(inputs.testsuites) }}
+      matrix: ${{ fromJson(needs.init.outputs.matrix) }}
 
   reporting:
     name: Reportings
