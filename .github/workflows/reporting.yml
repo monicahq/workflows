@@ -90,11 +90,6 @@ jobs:
     name: Reporting
     if: success() || failure()
 
-    permissions:
-      contents: read
-      checks: write
-      id-token: write
-    
     steps:
       - name: Download results
         uses: actions/download-artifact@v4
