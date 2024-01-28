@@ -28,6 +28,11 @@ jobs:
     name: Sonarcloud
     if: success() || failure()
 
+    permissions:
+      contents: read
+      checks: write
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
