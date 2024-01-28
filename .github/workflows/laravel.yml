@@ -53,15 +53,15 @@ jobs:
         id: matrix
         run: |
           {
-            echo "matrix={"
+            echo -n "matrix={"
             if [ -n "${{ inputs.php-versions }}" ]; then
-              echo "\"php-version\": ${{ inputs.php-versions }},"
+              echo -n "\"php-version\": ${{ inputs.php-versions }},"
             fi
             if [ -n "${{ inputs.connections }}" ]; then
-              echo "\"connection\": ${{ inputs.connections }},"
+              echo -n "\"connection\": ${{ inputs.connections }},"
             fi
             if [ -n "${{ inputs.testsuites }}" ]; then
-              echo "\"testsuites\": ${{ inputs.testsuites }},"
+              echo -n "\"testsuites\": ${{ inputs.testsuites }},"
             fi
             echo "\"exclude\": ${{ inputs.matrix-exclude }}}"
           } | tee $GITHUB_OUTPUT
