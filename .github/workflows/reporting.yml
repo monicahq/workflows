@@ -18,7 +18,7 @@ on:
     secrets:
       SONAR_TOKEN:
         required: true
-
+    
 jobs:
   ###########################
   # Reporting to sonarcloud

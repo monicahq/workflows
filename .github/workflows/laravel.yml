@@ -26,7 +26,7 @@ on:
         default: '[]'
       testsuites:
         type: string
-        default: '[]'
+        default: ''
       database_seed:
         type: boolean
         default: false
@@ -44,9 +44,29 @@ on:
         required: true
 
 jobs:
+  init:
+    name: Initialize
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Setup matrix
+        id: matrix
+        run: |
+          {
+            echo -n "matrix={"
+            echo -n "\"php-version\": ${{ inputs.php-versions }},"
+            echo -n "\"connection\": ${{ inputs.connections }},"
+            if [ -n "${{ inputs.testsuites }}" ]; then
+              echo -n "\"testsuites\": ${{ inputs.testsuites }},"
+            fi
+            echo "\"exclude\": ${{ inputs.matrix-exclude }}}"
+          } | tee $GITHUB_OUTPUT
+
   tests:
     name: Unit tests
     uses: ./.github/workflows/test_website.yml
+    needs: init
     with:
       php-version: ${{ matrix.php-version }}
       connection: ${{ matrix.connection }}
@@ -59,11 +79,7 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        php-version: ${{ fromJson(inputs.php-versions) }}
-        connection: ${{ fromJson(inputs.connections) }}
-        exclude: ${{ fromJson(inputs.matrix-exclude) }}
-        testsuites: ${{ fromJson(inputs.testsuites) }}
+      matrix: ${{ fromJson(needs.init.outputs.matrix) }}
 
   reporting:
     name: Reportings
