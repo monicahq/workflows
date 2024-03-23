@@ -16,7 +16,6 @@ on:
         type: string
       database_seed:
         type: boolean
-        default: false
       database_name:
         type: string
         default: monica
@@ -27,11 +26,9 @@ on:
         type: boolean
         default: true
       mock-assets:
-        required: false
         type: boolean
         default: true
       node-version:
-        required: false
         type: string
 
 jobs:
