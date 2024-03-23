@@ -39,6 +39,13 @@ on:
       vite:
         type: boolean
         default: true
+      mock-assets:
+        required: false
+        type: boolean
+        default: true
+      node-version:
+        required: false
+        type: string
     secrets:
       SONAR_TOKEN:
         required: true
@@ -76,6 +83,8 @@ jobs:
       database_name: ${{ inputs.database_name }}
       database_secret: ${{ inputs.database_secret }}
       vite: ${{ inputs.vite }}
+      mock-assets: ${{ inputs.mock-assets }}
+      node-version: ${{ inputs.node-version }}
 
     strategy:
       fail-fast: false

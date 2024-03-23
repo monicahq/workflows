@@ -26,6 +26,13 @@ on:
       vite:
         type: boolean
         default: true
+      mock-assets:
+        required: false
+        type: boolean
+        default: true
+      node-version:
+        required: false
+        type: string
 
 jobs:
   #############
@@ -76,12 +83,26 @@ jobs:
       - name: Install composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+    # Yarn
+      - name: Setup Node.js
+        if: ${{ ! inputs.mock-assets }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: yarn
+      - name: Install yarn dependencies
+        if: ${{ ! inputs.mock-assets }}
+        run: yarn install --immutable
+      - name: Build assets
+        if: ${{ ! inputs.mock-assets }}
+        run: yarn run build
+
     # Prepare
       - name: Prepare environment
         run: |
           cp tests/.env.ci.${{ inputs.connection }} .env
       - name: Mock assets
-        if: inputs.vite
+        if: inputs.vite && inputs.mock-assets
         run: |
           mkdir -p public/build/assets
           {\
@@ -95,7 +116,7 @@ jobs:
             echo "}"; \
           } | tee public/build/manifest.json
       - name: Mock assets (mix)
-        if: ${{ ! inputs.vite }}
+        if: ${{ ! inputs.vite && inputs.mock-assets }}
         run: |
           mkdir -p public/js public/css
           {\
