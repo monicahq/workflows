@@ -6,11 +6,15 @@ on:
       php-version:
         required: true
         type: string
+      with:
+        type: string
+        default: psalm,phpstan
 
 jobs:
   psalm:
     runs-on: ubuntu-latest
     name: Psalm
+    if: contains(inputs.with, 'psalm')
 
     steps:
       - name: Checkout sources
@@ -45,6 +49,7 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     name: PHPStan
+    if: contains(inputs.with, 'phpstan')
 
     steps:
       - name: Checkout sources
