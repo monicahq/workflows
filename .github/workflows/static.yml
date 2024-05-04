@@ -41,7 +41,9 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+        run: |
+          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+          composer require "php:^${{ inputs.php-version }}"
 
       - name: Run psalm
         run: vendor/bin/psalm --output-format=github
@@ -76,7 +78,9 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+        run: |
+          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+          composer require "php:^${{ inputs.php-version }}"
 
       - name: Run phpstan
         run: vendor/bin/phpstan analyse
