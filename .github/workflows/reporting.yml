@@ -64,12 +64,12 @@ jobs:
 
       - name: SonarCloud Scan
         if: env.SONAR_TOKEN != ''
-        uses: SonarSource/sonarcloud-github-action@v2.3.0
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          args: |
+          args: >
             -Dsonar.projectKey=${{ inputs.project }}
             -Dsonar.organization=${{ inputs.organization }}
             -Dsonar.sources=${{ inputs.sources }}
