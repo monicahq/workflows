@@ -79,4 +79,4 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Run phpstan
-        run: vendor/bin/phpstan analyse
+        run: vendor/bin/phpstan analyse --no-progress -vvv
