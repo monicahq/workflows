@@ -1,0 +1,60 @@
+name: Run tests
+description: Run PHP tests
+
+inputs:
+  connection:
+    description: 'Database connection to setup'
+    required: false
+    type: string
+    default: 'sqlite'
+    options:
+      - sqlite
+      - mysql
+      - pgsql
+  coverage:
+    description: 'Enable code coverage'
+    required: false
+    type: boolean
+    default: false
+  testsuite:
+    description: 'Run a specific testsuite'
+    required: false
+    type: string
+    default: ''
+  artifact:
+    description: 'Artifact name'
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Setup problem matchers for PHPUnit
+      shell: bash
+      run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+    - name: Run tests suite
+      shell: bash
+      run: |
+        if [[ -x vendor/bin/pest ]]; then
+          runner="vendor/bin/pest"
+        else
+          runner="vendor/bin/phpunit"
+        fi
+        $runner -c phpunit.xml ${{ inputs.testsuite != '' && format('--testsuite {0}', inputs.testsuite) || '' }} --log-junit ./results/junit/results_${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage_{0}.xml', steps.artifact.outputs.name) || '' }}
+      env:
+        DB_CONNECTION: ${{ inputs.connection }}
+
+    - name: Fix results files
+      shell: bash
+      run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
+      working-directory: results
+      if: success() || failure()
+
+    - name: Store results
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: results_${{ inputs.artifact }}
+        path: results
+        overwrite: true

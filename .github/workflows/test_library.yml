@@ -20,40 +20,14 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup PHP ${{ inputs.php-version }}
-        uses: shivammathur/setup-php@v2
+      - name: Install php dependencies
+        uses: monicahq/workflows/.github/actions/php@v3
         with:
           php-version: ${{ inputs.php-version }}
-          coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
-          ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
-
-      - name: Check PHP Version
-        run: php -v
-      - name: Check Composer Version
-        run: composer -V
-      - name: Check PHP Extensions
-        run: php -m
-      - name: Setup problem matchers for PHP
-        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-
-    # Composer
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - name: Cache composer files
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-            ${{ runner.os }}-composer-${{ inputs.php-version }}
-            ${{ runner.os }}-composer-
+          connection: ${{ inputs.connection }}
+          coverage: ${{ inputs.coverage }}
 
       - name: Install dependencies with Laravel ${{ inputs.laravel-version }}
         run: |
@@ -66,19 +40,10 @@ jobs:
         run: echo "name=${{ inputs.php-version }}_${{ inputs.laravel-version }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - name: Setup problem matchers for PHPUnit
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-      - name: Run tests
-        run: vendor/bin/phpunit -c phpunit.xml --log-junit ./results/junit/results_${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage_{0}.xml', steps.artifact.outputs.name) || '' }}
-
-      - name: Fix results files
-        if: success() || failure()
-        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
-        working-directory: results
-
-      - name: Store results
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
+      - name: Run php tests
+        uses: monicahq/workflows/.github/actions/phptests@v3
         with:
-          name: results_${{ steps.artifact.outputs.name }}
-          path: results
+          connection: ${{ inputs.connection }}
+          coverage: ${{ inputs.coverage }}
+          testsuite: ${{ inputs.testsuite }}
+          artifact: ${{ steps.artifact.outputs.name }}

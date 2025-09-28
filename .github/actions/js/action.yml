@@ -1,0 +1,98 @@
+name: Install npm and build assets
+description: Install npm dependencies and build assets
+
+inputs:
+  node-version:
+    description: 'Node.js version to setup'
+    required: false
+    type: string
+    default: '20'
+  mock-assets:
+    description: 'Use mock assets instead of building them'
+    required: false
+    type: boolean
+    default: true
+
+outputs:
+  commit:
+    description: The commit hash of the build
+    value: ${{ steps.version.outputs.commit }}
+  version:
+    description: The version of the build
+    value: ${{ steps.version.outputs.version }}
+  release:
+    description: The release of the build
+    value: ${{ steps.version.outputs.release }}
+  runner:
+    description: Whether npm or yarn was used
+    value: ${{ steps.runner.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Select runner
+      id: runner
+      shell: bash
+      run: |
+        if [[ -f "./yarn.lock" ]]; then
+          echo "result=yarn" >> $GITHUB_OUTPUT
+        else
+          echo "result=npm" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup Node.js
+      if: ${{ ! inputs.mock-assets }}
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ steps.runner.outputs.result }}
+
+    - name: Install npm dependencies
+      if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'npm' }}
+      shell: bash
+      run: npm install --prefer-offline --no-audit --progress=false --loglevel=error
+
+    - name: Install yarn dependencies
+      if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'yarn' }}
+      shell: bash
+      run: yarn install --immutable
+
+    - name: Get version
+      id: version
+      shell: bash
+      run: |
+        commit=$(git log --pretty="%H" -n1)
+        version=$(git describe --abbrev=0 --tags 2>/dev/null || echo '0.0.0' | sed 's/^v//')
+        release=$(git log --pretty="%h" -n1 $commit)
+        echo "commit=$commit" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "release=$release" >> $GITHUB_OUTPUT
+
+    - name: Prepare environment
+      shell: bash
+      run: |
+        { \
+          echo "VITE_PROD_SOURCE_MAPS=true"; \
+          echo "VITE_SENTRY_RELEASE=${{ steps.version.outputs.release }}"; \
+        } | tee .env
+
+    - name: Build javascript assets
+      if: ${{ ! inputs.mock-assets }}
+      shell: bash
+      run: ${{ steps.runner.outputs.result }} run build
+
+    - name: Mock assets
+      if: inputs.mock-assets
+      shell: bash
+      run: |
+        mkdir -p public/build/assets
+        {\
+          echo "{"; \
+          for f in app.js app.css; do \
+            [[ $first == 1 ]] && echo -n "," || first=1; \
+            k=${f##*.}/$f; \
+            echo "\"resources/$k\": {\"file\": \"assets/$f\", \"src\": \"resources/$k\"}"; \
+            echo '' > public/build/assets/$f; \
+          done; \
+          echo "}"; \
+        } | tee public/build/manifest.json

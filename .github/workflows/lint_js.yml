@@ -23,23 +23,21 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # Yarn
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Build javascript assets
+        uses: monicahq/workflows/.github/actions/js@v3
+        id: js
         with:
           node-version: ${{ inputs.node-version }}
-          cache: yarn
-      - name: Install yarn dependencies
-        run: yarn install --immutable
+          mock-assets: ${{ inputs.mock-assets }}
 
       - name: Run eslint
         if: inputs.eslint
-        run: yarn run lint --fix
+        run: ${{ steps.js.outputs.runner }} run lint --fix
       - name: Run prettier
         if: inputs.prettier
-        run: yarn run format
+        run: ${{ steps.js.outputs.runner }} run format
 
       - name: Check if there is any file update needed
         run: |
