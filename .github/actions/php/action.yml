@@ -34,10 +34,17 @@ runs:
         ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
 
     - name: Check PHP Version
+      shell: bash
       run: php -v
+      
     - name: Check Composer Version
+      shell: bash
       run: composer -V
+
     - name: Check PHP Extensions
+      shell: bash
       run: php -m
+
     - name: Setup problem matchers for PHP
+      shell: bash
       run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
