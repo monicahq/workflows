@@ -57,11 +57,6 @@ runs:
       shell: bash
       run: yarn install --immutable
 
-    - name: List files
-      shell: bash
-      run: |
-        ls -la node_modules
-
     - name: Get version
       id: version
       shell: bash
