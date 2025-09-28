@@ -21,6 +21,10 @@ inputs:
     required: false
     type: string
     default: ''
+  artifact:
+    description: 'Artifact name'
+    required: true
+    type: string
 
 runs:
   using: composite
@@ -51,5 +55,5 @@ runs:
       if: success() || failure()
       uses: actions/upload-artifact@v4
       with:
-        name: results_${{ steps.artifact.outputs.name }}
+        name: results_${{ inputs.artifact }}
         path: results

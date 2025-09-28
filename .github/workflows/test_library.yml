@@ -46,3 +46,4 @@ jobs:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
           testsuite: ${{ inputs.testsuite }}
+          artifact: ${{ steps.artifact.outputs.name }}
