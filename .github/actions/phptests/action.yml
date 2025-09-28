@@ -25,15 +25,17 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Setup problem matchers for PHPUnit
+      shell: bash
+      run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
     - name: Run tests suite
       shell: bash
       run: |
         if [[ -x vendor/bin/pest ]]; then
           runner="vendor/bin/pest"
-          echo "::add-matcher::${{ runner.tool_cache }}/pest.json"
         else
           runner="vendor/bin/phpunit"
-          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
         fi
         $runner -c phpunit.xml ${{ inputs.testsuite != '' && format('--testsuite {0}', inputs.testsuite) || '' }} --log-junit ./results/junit/results_${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage_{0}.xml', steps.artifact.outputs.name) || '' }}
       env:
