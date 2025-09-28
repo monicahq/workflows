@@ -20,12 +20,12 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - uses: monicahq/workflows/.github/actions/php@${{ github.workflow_sha }}
+      - uses: monicahq/workflows/.github/actions/php@npm
         with:
           php-version: ${{ inputs.php-version }}
           coverage: none
 
-      - uses: monicahq/workflows/.github/actions/composer@${{ github.workflow_sha }}
+      - uses: monicahq/workflows/.github/actions/composer@npm
 
       - name: Run psalm
         run: vendor/bin/psalm --output-format=github --php-version=${{ inputs.php-version }}
@@ -38,12 +38,12 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
-      - uses: monicahq/workflows/.github/actions/php@${{ github.workflow_sha }}
+      - uses: monicahq/workflows/.github/actions/php@npm
         with:
           php-version: ${{ inputs.php-version }}
           coverage: none
 
-      - uses: monicahq/workflows/.github/actions/composer@${{ github.workflow_sha }}
+      - uses: monicahq/workflows/.github/actions/composer@npm
 
       - name: Run phpstan
         run: vendor/bin/phpstan analyse

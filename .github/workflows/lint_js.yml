@@ -25,7 +25,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - uses: monicahq/workflows/.github/actions/js@${{ github.workflow_sha }}
+      - uses: monicahq/workflows/.github/actions/js@npm
         id: js
         with:
           node-version: ${{ inputs.node-version }}
