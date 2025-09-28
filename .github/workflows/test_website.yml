@@ -43,15 +43,15 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - uses: ./.github/actions/php
+      - uses: monicahq/workflows/.github/actions/php
         with:
           php-version: ${{ inputs.php-version }}
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
 
-      - uses: ./.github/actions/composer
+      - uses: monicahq/workflows/.github/actions/composer
 
-      - uses: ./.github/actions/js
+      - uses: monicahq/workflows/.github/actions/js
         with:
           node-version: ${{ inputs.node-version }}
           mock-assets: ${{ inputs.mock-assets }}
@@ -93,7 +93,7 @@ jobs:
         run: echo "name=${{ inputs.connection }}_${{ inputs.php-version }}_${{ inputs.testsuite }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - uses: ./.github/actions/phptests
+      - uses: monicahq/workflows/.github/actions/phptests
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
