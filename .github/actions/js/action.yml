@@ -42,7 +42,7 @@ runs:
 
     - name: Setup Node.js
       if: ${{ ! inputs.mock-assets }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ steps.runner.outputs.result }}
