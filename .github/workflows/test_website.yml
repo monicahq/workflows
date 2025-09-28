@@ -43,15 +43,15 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - uses: monicahq/workflows/.github/actions/php@npm
+      - uses: monicahq/workflows/.github/actions/php@v3
         with:
           php-version: ${{ inputs.php-version }}
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
 
-      - uses: monicahq/workflows/.github/actions/composer@npm
+      - uses: monicahq/workflows/.github/actions/composer@v3
 
-      - uses: monicahq/workflows/.github/actions/js@npm
+      - uses: monicahq/workflows/.github/actions/js@v3
         with:
           node-version: ${{ inputs.node-version }}
           mock-assets: ${{ inputs.mock-assets }}
@@ -70,7 +70,7 @@ jobs:
         run: |
           sudo systemctl start mysql.service
           mysql --protocol=tcp -u root -proot -e "CREATE DATABASE IF NOT EXISTS ${{ inputs.database_name }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-          
+
       - name: Create pgsql database
         if: inputs.connection == 'pgsql'
         run: |
@@ -97,7 +97,7 @@ jobs:
         run: echo "name=${{ inputs.connection }}_${{ inputs.php-version }}_${{ inputs.testsuite }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - uses: monicahq/workflows/.github/actions/phptests@npm
+      - uses: monicahq/workflows/.github/actions/phptests@v3
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
