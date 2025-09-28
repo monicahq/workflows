@@ -40,8 +40,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - name: Build assets
-        uses: monicahq/workflows/.github/actions/js@npm
+      - name: Build javascript assets
+        uses: monicahq/workflows/.github/actions/js@v3
         id: js
         with:
           node-version: ${{ inputs.node-version }}

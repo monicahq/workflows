@@ -76,7 +76,7 @@ runs:
           echo "VITE_SENTRY_RELEASE=${{ steps.version.outputs.release }}"; \
         } | tee .env
 
-    - name: Build assets
+    - name: Build javascript assets
       if: ${{ ! inputs.mock-assets }}
       shell: bash
       run: ${{ steps.runner.outputs.result }} run build
