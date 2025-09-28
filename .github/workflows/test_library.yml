@@ -22,13 +22,12 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - uses: monicahq/workflows/.github/actions/php@v3
+      - name: Install php dependencies
+        uses: monicahq/workflows/.github/actions/php@npm
         with:
           php-version: ${{ inputs.php-version }}
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
-
-      - uses: monicahq/workflows/.github/actions/composer@v3
 
       - name: Install dependencies with Laravel ${{ inputs.laravel-version }}
         run: |
@@ -41,7 +40,8 @@ jobs:
         run: echo "name=${{ inputs.php-version }}_${{ inputs.laravel-version }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - uses: monicahq/workflows/.github/actions/phptests@v3
+      - name: Run php tests
+        uses: monicahq/workflows/.github/actions/phptests@npm
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}

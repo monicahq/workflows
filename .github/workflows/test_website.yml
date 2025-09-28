@@ -43,15 +43,15 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
 
-      - uses: monicahq/workflows/.github/actions/php@v3
+      - name: Install php dependencies
+        uses: monicahq/workflows/.github/actions/php@npm
         with:
           php-version: ${{ inputs.php-version }}
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
 
-      - uses: monicahq/workflows/.github/actions/composer@v3
-
-      - uses: monicahq/workflows/.github/actions/js@v3
+      - name: Build assets
+        uses: monicahq/workflows/.github/actions/js@npm
         with:
           node-version: ${{ inputs.node-version }}
           mock-assets: ${{ inputs.mock-assets }}
@@ -97,7 +97,8 @@ jobs:
         run: echo "name=${{ inputs.connection }}_${{ inputs.php-version }}_${{ inputs.testsuite }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - uses: monicahq/workflows/.github/actions/phptests@v3
+      - name: Run php tests
+        uses: monicahq/workflows/.github/actions/phptests@npm
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
