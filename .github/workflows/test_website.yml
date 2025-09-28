@@ -64,11 +64,13 @@ jobs:
       - name: Create sqlite database
         if: inputs.connection == 'sqlite'
         run: touch database/database.sqlite
+
       - name: Create mysql database
         if: inputs.connection == 'mysql'
         run: |
           sudo systemctl start mysql.service
           mysql --protocol=tcp -u root -proot -e "CREATE DATABASE IF NOT EXISTS ${{ inputs.database_name }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+          
       - name: Create pgsql database
         if: inputs.connection == 'pgsql'
         run: |
@@ -82,9 +84,11 @@ jobs:
 
       - name: Run migrations
         run: php artisan migrate --no-interaction -vvv
+
       - name: Run seeds
         run: php artisan db:seed --no-interaction -vvv
         if: inputs.database_seed
+
       - name: Cache route
         run: php artisan route:cache
 

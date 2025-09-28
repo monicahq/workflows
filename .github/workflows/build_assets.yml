@@ -54,6 +54,7 @@ jobs:
           path: |
             public/build/**/*
             !public/build/**/*.map
+          overwrite: true
 
       - name: Store source maps
         if: inputs.store
@@ -62,3 +63,4 @@ jobs:
           name: sourcemaps
           path: |
             public/build/**/*.map
+          overwrite: true

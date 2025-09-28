@@ -57,3 +57,4 @@ runs:
       with:
         name: results_${{ inputs.artifact }}
         path: results
+        overwrite: true
