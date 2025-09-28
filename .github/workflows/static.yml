@@ -18,30 +18,14 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup PHP ${{ inputs.php-version }}
-        uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/php
         with:
           php-version: ${{ inputs.php-version }}
           coverage: none
 
-      # Composer
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - name: Cache composer files
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-            ${{ runner.os }}-composer-${{ inputs.php-version }}
-            ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+      - uses: ./.github/actions/composer
 
       - name: Run psalm
         run: vendor/bin/psalm --output-format=github --php-version=${{ inputs.php-version }}
@@ -53,30 +37,13 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Setup PHP ${{ inputs.php-version }}
-        uses: shivammathur/setup-php@v2
+        uses: actions/checkout@v5
+      - uses: ./.github/actions/php
         with:
           php-version: ${{ inputs.php-version }}
           coverage: none
 
-      # Composer
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - name: Cache composer files
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-            ${{ runner.os }}-composer-${{ inputs.php-version }}
-            ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+      - uses: ./.github/actions/composer
 
       - name: Run phpstan
         run: vendor/bin/phpstan analyse

@@ -1,0 +1,43 @@
+name: Install php
+description: Install PHP
+
+inputs:
+  php-version:
+    description: 'PHP version to setup'
+    required: true
+    type: string
+    default: '8.2'
+  connection:
+    description: 'Database connection to setup'
+    required: false
+    type: string
+    default: 'sqlite'
+    options:
+      - sqlite
+      - mysql
+      - pgsql
+  coverage:
+    description: 'Enable code coverage'
+    required: false
+    type: boolean
+    default: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup PHP ${{ inputs.php-version }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: mbstring, dom, fileinfo, ${{ inputs.connection }}
+        coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
+        ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
+
+    - name: Check PHP Version
+      run: php -v
+    - name: Check Composer Version
+      run: composer -V
+    - name: Check PHP Extensions
+      run: php -m
+    - name: Setup problem matchers for PHP
+      run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"

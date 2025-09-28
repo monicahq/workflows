@@ -1,0 +1,28 @@
+name: Composer install
+description: Install PHP dependencies using Composer
+
+runs:
+  using: composite
+  steps:
+    - name: Validate composer.json and composer.lock
+      shell: bash
+      run: composer validate
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache composer files
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
+          ${{ runner.os }}-composer-${{ inputs.php-version }}
+          ${{ runner.os }}-composer-
+
+    - name: Install composer dependencies
+      shell: bash
+      run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader

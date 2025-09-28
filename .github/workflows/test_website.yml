@@ -41,91 +41,26 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup PHP ${{ inputs.php-version }}
-        uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/php
         with:
           php-version: ${{ inputs.php-version }}
-          extensions: mbstring, dom, fileinfo, ${{ inputs.connection }}
-          coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
-          ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
+          connection: ${{ inputs.connection }}
+          coverage: ${{ inputs.coverage }}
 
-      - name: Check PHP Version
-        run: php -v
-      - name: Check Composer Version
-        run: composer -V
-      - name: Check PHP Extensions
-        run: php -m
-      - name: Setup problem matchers for PHP
-        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+      - uses: ./.github/actions/composer
 
-    # Composer
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - name: Cache composer files
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ inputs.php-version }}-${{ hashFiles('**/composer.lock') }}
-            ${{ runner.os }}-composer-${{ inputs.php-version }}
-            ${{ runner.os }}-composer-
-
-      - name: Install composer dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
-
-    # Yarn
-      - name: Setup Node.js
-        if: ${{ ! inputs.mock-assets }}
-        uses: actions/setup-node@v4
+      - uses: ./.github/actions/js
         with:
           node-version: ${{ inputs.node-version }}
-          cache: yarn
-      - name: Install yarn dependencies
-        if: ${{ ! inputs.mock-assets }}
-        run: yarn install --immutable
-      - name: Build assets
-        if: ${{ ! inputs.mock-assets }}
-        run: yarn run build
+          mock-assets: ${{ inputs.mock-assets }}
 
     # Prepare
       - name: Prepare environment
         run: |
           cp tests/.env.ci.${{ inputs.connection }} .env
-      - name: Mock assets
-        if: inputs.vite && inputs.mock-assets
-        run: |
-          mkdir -p public/build/assets
-          {\
-            echo "{"; \
-            for f in app.js app.css; do \
-              [[ $first == 1 ]] && echo -n "," || first=1; \
-              k=${f##*.}/$f; \
-              echo "\"resources/$k\": {\"file\": \"assets/$f\", \"src\": \"resources/$k\"}"; \
-              echo '' > public/build/assets/$f; \
-            done; \
-            echo "}"; \
-          } | tee public/build/manifest.json
-      - name: Mock assets (mix)
-        if: ${{ ! inputs.vite && inputs.mock-assets }}
-        run: |
-          mkdir -p public/js public/css
-          {\
-            echo "{"; \
-            for f in app.js app.css app2.js app2.css; do \
-              [[ $first == 1 ]] && echo -n "," || first=1; \
-              k=${f##*.}/$f; \
-              echo "\"/$k\": \"/$k\""; \
-              echo '' > public/$k; \
-            done; \
-            echo "}"; \
-          } | tee public/mix-manifest.json
+
       - name: Create sqlite database
         if: inputs.connection == 'sqlite'
         run: touch database/database.sqlite
@@ -158,21 +93,8 @@ jobs:
         run: echo "name=${{ inputs.connection }}_${{ inputs.php-version }}_${{ inputs.testsuite }}" | sed -e "s/*//g" >> $GITHUB_OUTPUT
 
     # Test
-      - name: Setup problem matchers for PHPUnit
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-      - name: Run tests suite
-        run: vendor/bin/phpunit -c phpunit.xml ${{ inputs.testsuite != '' && format('--testsuite {0}', inputs.testsuite) || '' }} --log-junit ./results/junit/results_${{ steps.artifact.outputs.name }}.xml ${{ inputs.coverage && format('--coverage-clover ./results/coverage_{0}.xml', steps.artifact.outputs.name) || '' }}
-        env:
-          DB_CONNECTION: ${{ inputs.connection }}
-
-      - name: Fix results files
-        run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
-        working-directory: results
-        if: success() || failure()
-
-      - name: Store results
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/phptests
         with:
-          name: results_${{ steps.artifact.outputs.name }}
-          path: results
+          connection: ${{ inputs.connection }}
+          coverage: ${{ inputs.coverage }}
+          testsuite: ${{ inputs.testsuite }}

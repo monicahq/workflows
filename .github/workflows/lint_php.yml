@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get pint version
         id: pint
@@ -21,7 +21,7 @@ jobs:
           echo "version=$(composer show laravel/pint --locked --format=json | jq -r '.versions[0]' | sed 's/v//')" >> $GITHUB_OUTPUT
 
       - name: laravel-pint
-        uses: aglipanci/laravel-pint-action@2.5
+        uses: aglipanci/laravel-pint-action@2.6
         with:
           configPath: pint.json
           pintVersion: ${{ steps.pint.outputs.version }}
