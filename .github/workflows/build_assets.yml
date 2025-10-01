@@ -14,6 +14,10 @@ on:
         required: false
         type: boolean
         default: false
+      php-version:
+        required: false
+        type: string
+        default: ''
     outputs:
       commit:
         description: The commit hash of the build
@@ -47,6 +51,8 @@ jobs:
       - name: Install php dependencies
         uses: monicahq/workflows/.github/actions/php@v3
         if: inputs.php-install
+        with:
+          php-version: ${{ php-version }}
 
       - name: Build javascript assets
         uses: monicahq/workflows/.github/actions/js@v3
