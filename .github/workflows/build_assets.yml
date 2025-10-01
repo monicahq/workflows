@@ -52,7 +52,7 @@ jobs:
         uses: monicahq/workflows/.github/actions/php@v3
         if: inputs.php-install
         with:
-          php-version: ${{ php-version }}
+          php-version: ${{ inputs.php-version }}
 
       - name: Build javascript assets
         uses: monicahq/workflows/.github/actions/js@v3
