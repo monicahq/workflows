@@ -6,7 +6,7 @@ inputs:
     description: 'PHP version to setup'
     required: true
     type: string
-    default: '8.2'
+    default: '8.4'
   connection:
     description: 'Database connection to setup'
     required: false

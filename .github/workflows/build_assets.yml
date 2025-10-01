@@ -10,6 +10,10 @@ on:
         required: false
         type: boolean
         default: false
+      php-install:
+        required: false
+        type: boolean
+        default: false
     outputs:
       commit:
         description: The commit hash of the build
@@ -39,6 +43,10 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v5
+
+      - name: Install php dependencies
+        uses: monicahq/workflows/.github/actions/php@v3
+        if: inputs.php-install
 
       - name: Build javascript assets
         uses: monicahq/workflows/.github/actions/js@v3
