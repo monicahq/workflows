@@ -51,11 +51,15 @@ runs:
       if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'npm' }}
       shell: bash
       run: npm install --prefer-offline --no-audit --progress=false --loglevel=error
+      env:
+        HUSKY: 0
 
     - name: Install yarn dependencies
       if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'yarn' }}
       shell: bash
       run: yarn install --immutable
+      env:
+        HUSKY: 0
 
     - name: Get version
       id: version
