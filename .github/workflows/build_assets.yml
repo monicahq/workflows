@@ -49,13 +49,13 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install php dependencies
-        uses: monicahq/workflows/.github/actions/php@v3
+        uses: monicahq/workflows/.github/actions/php@v4
         if: inputs.php-install
         with:
           php-version: ${{ inputs.php-version }}
 
       - name: Build javascript assets
-        uses: monicahq/workflows/.github/actions/js@v3
+        uses: monicahq/workflows/.github/actions/js@v4
         id: js
         with:
           node-version: ${{ inputs.node-version }}
