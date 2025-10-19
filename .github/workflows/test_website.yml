@@ -51,7 +51,7 @@ jobs:
           coverage: ${{ inputs.coverage }}
 
       - name: Build javascript assets
-        uses: monicahq/workflows/.github/actions/js@bun
+        uses: monicahq/workflows/.github/actions/js@v3
         with:
           node-version: ${{ inputs.node-version }}
           mock-assets: ${{ inputs.mock-assets }}
