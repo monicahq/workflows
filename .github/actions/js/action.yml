@@ -52,7 +52,7 @@ runs:
       uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ steps.runner.outputs.result }}
+        cache: ${{ steps.runner.outputs.result != 'bun' && steps.runner.outputs.result || '' }}
 
     - name: Install dependencies
       if: ${{ ! inputs.mock-assets }}
