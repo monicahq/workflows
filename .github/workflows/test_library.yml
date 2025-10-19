@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install php dependencies
-        uses: monicahq/workflows/.github/actions/php@v3
+        uses: monicahq/workflows/.github/actions/php@v4
         with:
           php-version: ${{ inputs.php-version }}
           connection: ${{ inputs.connection }}
@@ -41,7 +41,7 @@ jobs:
 
     # Test
       - name: Run php tests
-        uses: monicahq/workflows/.github/actions/phptests@v3
+        uses: monicahq/workflows/.github/actions/phptests@v4
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
