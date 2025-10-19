@@ -55,7 +55,7 @@ jobs:
           php-version: ${{ inputs.php-version }}
 
       - name: Build javascript assets
-        uses: monicahq/workflows/.github/actions/js@v3
+        uses: monicahq/workflows/.github/actions/js@bun
         id: js
         with:
           node-version: ${{ inputs.node-version }}
