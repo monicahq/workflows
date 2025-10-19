@@ -36,28 +36,35 @@ runs:
       run: |
         if [[ -f "./yarn.lock" ]]; then
           echo "result=yarn" >> $GITHUB_OUTPUT
+        elif [[ -f "./bun.lock" ]]; then
+          echo "result=bun" >> $GITHUB_OUTPUT
         else
           echo "result=npm" >> $GITHUB_OUTPUT
         fi
+
+    - uses: oven-sh/setup-bun@v2
+      if: ${{ steps.runner.outputs.result == 'bun' && ! inputs.mock-assets }}
+      with:
+        bun-version: latest
 
     - name: Setup Node.js
       if: ${{ ! inputs.mock-assets }}
       uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ steps.runner.outputs.result }}
+        cache: ${{ steps.runner.outputs.result != 'bun' && steps.runner.outputs.result || '' }}
 
-    - name: Install npm dependencies
-      if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'npm' }}
+    - name: Install dependencies
+      if: ${{ ! inputs.mock-assets }}
       shell: bash
-      run: npm install --prefer-offline --no-audit --progress=false --loglevel=error
-      env:
-        HUSKY: 0
-
-    - name: Install yarn dependencies
-      if: ${{ ! inputs.mock-assets && steps.runner.outputs.result == 'yarn' }}
-      shell: bash
-      run: yarn install --immutable
+      run: |
+        if [[ "${{ steps.runner.outputs.result }}" == "yarn" ]]; then
+          yarn install --immutable
+        elif [[ "${{ steps.runner.outputs.result }}" == "bun" ]]; then
+          bun install
+        else
+          npm install --prefer-offline --no-audit --progress=false --loglevel=error
+        fi
       env:
         HUSKY: 0
 
