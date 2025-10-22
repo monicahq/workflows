@@ -47,7 +47,9 @@ runs:
 
     - name: Fix results files
       shell: bash
-      run: sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
+      run: |
+        sed -i -e "s%$GITHUB_WORKSPACE/%%g" **/*.xml
+        sed -i -e "s%$GITHUB_WORKSPACE/%%g" *.xml
       working-directory: results
       if: success() || failure()
 
