@@ -31,7 +31,7 @@ runs:
         php-version: ${{ inputs.php-version }}
         extensions: mbstring, dom, fileinfo, ${{ inputs.connection }}
         coverage: ${{ inputs.coverage && 'pcov' || 'none' }}
-        ini-values: ${{ inputs.coverage && 'pcov.directory=., pcov.exclude="~vendor~"' || '' }}
+        ini-values: ${{ inputs.coverage && format('pcov.directory={0}, pcov.exclude="~vendor~"', github.workspace) || '' }}
 
     - name: Check PHP Version
       shell: bash
