@@ -98,7 +98,7 @@ jobs:
 
     # Test
       - name: Run php tests
-        uses: monicahq/workflows/.github/actions/phptests@v4
+        uses: monicahq/workflows/.github/actions/phptests@fix-coverage
         with:
           connection: ${{ inputs.connection }}
           coverage: ${{ inputs.coverage }}
