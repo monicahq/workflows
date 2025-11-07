@@ -43,6 +43,11 @@ on:
         default: true
       node-version:
         type: string
+      assets:
+        description: 'List of assets to mock'
+        type: string
+        default: app.js app.css
+
     secrets:
       SONAR_TOKEN:
         required: true
@@ -82,6 +87,7 @@ jobs:
       vite: ${{ inputs.vite }}
       mock-assets: ${{ inputs.mock-assets }}
       node-version: ${{ inputs.node-version }}
+      assets: ${{ inputs.assets }}
 
     strategy:
       fail-fast: false
