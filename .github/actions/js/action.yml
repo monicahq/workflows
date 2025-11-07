@@ -12,6 +12,11 @@ inputs:
     required: false
     type: boolean
     default: true
+  assets:
+    description: 'List of assets to mock'
+    required: false
+    type: string
+    default: app.js app.css
 
 outputs:
   commit:
@@ -99,7 +104,7 @@ runs:
         mkdir -p public/build/assets
         {\
           echo "{"; \
-          for f in app.js app.css; do \
+          for f in ${{ inputs.assets }}; do \
             [[ $first == 1 ]] && echo -n "," || first=1; \
             k=${f##*.}/$f; \
             echo "\"resources/$k\": {\"file\": \"assets/$f\", \"src\": \"resources/$k\"}"; \
