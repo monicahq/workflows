@@ -7,16 +7,16 @@ on:
         type: string
       conventionalcommits_version:
         type: string
-        default: '7'
+        default: '9'
       semantic_changelog_version:
         type: string
         default: '6'
       semantic_version:
         type: string
-        default: '22'
+        default: '25'
       semantic_node_version:
         type: string
-        default: '20'
+        default: '24'
     secrets:
       GH_TOKEN_RELEASE:
     outputs:
@@ -64,7 +64,7 @@ jobs:
           node-version: ${{ inputs.semantic_node_version }}
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v5
+        uses: cycjimmy/semantic-release-action@v6
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
