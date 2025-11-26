@@ -7,7 +7,7 @@ on:
         type: string
       conventionalcommits_version:
         type: string
-        default: '7'
+        default: '9'
       semantic_changelog_version:
         type: string
         default: '6'
