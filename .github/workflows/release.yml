@@ -13,10 +13,10 @@ on:
         default: '6'
       semantic_version:
         type: string
-        default: '22'
+        default: '25'
       semantic_node_version:
         type: string
-        default: '20'
+        default: '24'
     secrets:
       GH_TOKEN_RELEASE:
     outputs:
