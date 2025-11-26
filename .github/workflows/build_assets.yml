@@ -63,7 +63,7 @@ jobs:
 
       - name: Store assets
         if: inputs.store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: assets
           path: |
@@ -73,7 +73,7 @@ jobs:
 
       - name: Store source maps
         if: inputs.store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sourcemaps
           path: |
