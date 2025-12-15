@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Download results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ inputs.pattern }}
           path: results
@@ -97,7 +97,7 @@ jobs:
     
     steps:
       - name: Download results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ inputs.pattern }}
           path: results
