@@ -82,7 +82,7 @@ jobs:
 
       - name: Store changelog file
         if: steps.semantic.outputs.new_release_published == 'true'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: changelog
           path: CHANGELOG.md
