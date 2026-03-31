@@ -5,17 +5,14 @@ inputs:
   node-version:
     description: 'Node.js version to setup'
     required: false
-    type: string
     default: '20'
   mock-assets:
     description: 'Use mock assets instead of building them'
     required: false
-    type: boolean
-    default: true
+    default: 'true'
   assets:
     description: 'List of assets to mock'
     required: false
-    type: string
     default: app.js app.css
 
 outputs:
@@ -48,19 +45,19 @@ runs:
         fi
 
     - uses: oven-sh/setup-bun@v2
-      if: ${{ steps.runner.outputs.result == 'bun' && ! inputs.mock-assets }}
+      if: ${{ steps.runner.outputs.result == 'bun' && inputs.mock-assets != 'true' }}
       with:
         bun-version: latest
 
     - name: Setup Node.js
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets != 'true' }}
       uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ steps.runner.outputs.result != 'bun' && steps.runner.outputs.result || '' }}
 
     - name: Install dependencies
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets != 'true' }}
       shell: bash
       run: |
         if [[ "${{ steps.runner.outputs.result }}" == "yarn" ]]; then
@@ -93,12 +90,12 @@ runs:
         } | tee .env
 
     - name: Build javascript assets
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets != 'true' }}
       shell: bash
       run: ${{ steps.runner.outputs.result }} run build
 
     - name: Mock assets
-      if: inputs.mock-assets
+      if: inputs.mock-assets == 'true'
       shell: bash
       run: |
         mkdir -p public/build/assets
