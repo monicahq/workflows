@@ -95,7 +95,7 @@ runs:
       run: ${{ steps.runner.outputs.result }} run build
 
     - name: Mock assets
-      if: inputs.mock-assets
+      if: inputs.mock-assets == 'true'
       shell: bash
       run: |
         mkdir -p public/build/assets
