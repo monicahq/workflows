@@ -48,19 +48,19 @@ runs:
         fi
 
     - uses: oven-sh/setup-bun@v2
-      if: ${{ steps.runner.outputs.result == 'bun' && ! inputs.mock-assets }}
+      if: ${{ steps.runner.outputs.result == 'bun' && inputs.mock-assets == false }}
       with:
         bun-version: latest
 
     - name: Setup Node.js
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets == false }}
       uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ steps.runner.outputs.result != 'bun' && steps.runner.outputs.result || '' }}
 
     - name: Install dependencies
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets == false }}
       shell: bash
       run: |
         if [[ "${{ steps.runner.outputs.result }}" == "yarn" ]]; then
@@ -93,7 +93,7 @@ runs:
         } | tee .env
 
     - name: Build javascript assets
-      if: ${{ ! inputs.mock-assets }}
+      if: ${{ inputs.mock-assets == false }}
       shell: bash
       run: ${{ steps.runner.outputs.result }} run build
 
