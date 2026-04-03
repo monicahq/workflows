@@ -45,4 +45,4 @@ jobs:
           coverage: none
 
       - name: Run phpstan
-        run: vendor/bin/phpstan analyse
+        run: vendor/bin/phpstan analyse --no-progress -vvv
