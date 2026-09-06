@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
       
       - name: Update Tag
-        uses: richardsimko/update-tag@v2
+        uses: richardsimko/update-tag@v3
         with:
           tag_name: v${{ needs.semantic-release.outputs.new_release_major_version }}
         env:

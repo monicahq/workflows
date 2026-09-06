@@ -55,7 +55,7 @@ runs:
 
     - name: Store results
       if: success() || failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: results_${{ inputs.artifact }}
         path: results
